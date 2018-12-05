@@ -108,105 +108,106 @@ function check_distribution()
 				DISTRIBUTION='unknown'
 	fi
 
-		pr_tip "Distribution : ${DISTRIBUTION}"
+	pr_tip "Distribution : ${DISTRIBUTION}"
 
-		return 0
+	return 0
 }
 
 ## Interface: clear history files to prepare for reinstall files
 function clear_history()
 {
-		rm -rf ${MY_SRC_DIR}
+	rm -rf ${MY_SRC_DIR}
 
-		pr_ok "[clear] OK"
-		return 0
+	pr_ok "[clear] OK"
+	return 0
 }
 
 ## Interface: install dependency
 function install_depend()
 {
-#		cp patch/systemtap/module.lds /usr/src/kernels/4.19.14-estuary.9.aarch64/arch/arm64/kernel/
+	if [ ! -f /usr/sr/kernels/`uname -r`/arch/arm64/kernel/modules.lds ] ; then
+		cp patch/systemtap/module.lds /usr/src/kernels/`uname -r`/arch/arm64/kernel/
+	fi
 
-		if [ "$DISTRIBUTION"x == "Debian"x ] ; then
-				apt-get install -y ${MY_DEBIAN_DEPEND}
-				ass_rst $? 0 "install depend failed!"
-		elif [ "$DISTRIBUTION"x == "CentOS"x ] ; then
-				yum install -y ${MY_CENTOS_DEPEND} --setopt=skip_missing_names_on_install=False
-				ass_rst $? 0 "install depend failed!"
-		fi
+	if [ "$DISTRIBUTION"x == "Debian"x ] ; then
+		apt-get install -y ${MY_DEBIAN_DEPEND}
+		ass_rst $? 0 "install depend failed!"
+	elif [ "$DISTRIBUTION"x == "CentOS"x ] ; then
+		yum install -y ${MY_CENTOS_DEPEND} --setopt=skip_missing_names_on_install=False
+		ass_rst $? 0 "install depend failed!"
+	fi
 
-#		cp patch/systemtap/module.lds /usr/src/kernels/4.19.14-estuary.9.aarch64/arch/arm64/kernel/
 
-		pr_tip "[depend] skiped"
-		return 0
+	pr_tip "[depend] skiped"
+	return 0
 }
 
 ## Interface: download_src
 function download_src()
 {
 
-		git clone ${SRC_URL}
-		ass_rst $? 0 "git clone failed!"
+	git clone ${SRC_URL}
+	ass_rst $? 0 "git clone failed!"
 
-		cd ${MY_SRC_DIR}
-		ass_rst $? 0 "cd ${MY_SRC_DIR} failed!"
+	cd ${MY_SRC_DIR}
+	ass_rst $? 0 "cd ${MY_SRC_DIR} failed!"
 
-		pr_ok "[download] OK"
-		return 0
+	pr_ok "[download] OK"
+	return 0
 }
 
 ## Interface: compile_and_install
 function compile_and_install()
 {
-		git reset --hard dd57c73873b184b329f47bd186fa77e6d842eac0
-		pr_ok "[install]<version> OK!"
+	git reset --hard dd57c73873b184b329f47bd186fa77e6d842eac0
+	pr_ok "[install]<version> OK!"
 
-		rm -rf .git
-		pr_ok "[install]<rm_git> OK!"
+	rm -rf .git
+	pr_ok "[install]<rm_git> OK!"
 
-		./configure
-		ass_rst $? 0 "configure failed!"
+	./configure
+	ass_rst $? 0 "configure failed!"
 
-		make
-		ass_rst $? 0 "make failed!"
+	make
+	ass_rst $? 0 "make failed!"
 
-		make check
-		ass_rst $? 0 "make check failed!"
+	make check
+	ass_rst $? 0 "make check failed!"
 
-		make install
-		ass_rst $? 0 "make install failed!"
+	make install
+	ass_rst $? 0 "make install failed!"
 
-		pr_ok "[install]<compile> OK"
+	pr_ok "[install]<compile> OK"
 
-		if [ "$DISTRIBUTION"x == "Debian"x ] ; then
-				pr_info ""
-		elif [ "$DISTRIBUTION"x == "CentOS"x ] ; then
-				pr_info ""
-		fi
+	if [ "$DISTRIBUTION"x == "Debian"x ] ; then
+		pr_info ""
+	elif [ "$DISTRIBUTION"x == "CentOS"x ] ; then
+		pr_info ""
+	fi
 
-		pr_tip "[install]<install>"
-		return 0
+	pr_tip "[install]<install>"
+	return 0
 }
 
 ## Interface: software self test
 ## example: print version number, run any simple example
 function selftest()
 {
-		stap -ve 'probe begin { print("ok") exit()}'
-		ass_rst $? 0 "test stap failed!"
+	stap -ve 'probe begin { print("ok") exit()}'
+	ass_rst $? 0 "test stap failed!"
 
-		pr_ok "[selftest] OK"
-		return 0
+	pr_ok "[selftest] OK"
+	return 0
 }
 
 ## Interface: finish install
 function finish_install()
 {
-		cd ../
-		rm -rf ${MY_SRC_DIR}
+	cd ../
+	rm -rf ${MY_SRC_DIR}
 
-		pr_ok "[finish]<clean> OK"
-		return 0
+	pr_ok "[finish]<clean> OK"
+	return 0
 }
 
 ### Dependence ###
@@ -218,26 +219,26 @@ function finish_install()
 ### main code ###
 function main()
 {
-		check_distribution
-		ass_rst $? 0 "check_distribution failed!"
+	check_distribution
+	ass_rst $? 0 "check_distribution failed!"
 
-		clear_history
-		ass_rst $? 0 "clear_history failed!"
+	clear_history
+	ass_rst $? 0 "clear_history failed!"
 
-		install_depend
-		ass_rst $? 0 "install_depend failed!"
+	install_depend
+	ass_rst $? 0 "install_depend failed!"
 
-		download_src
-		ass_rst $? 0 "download_src failed!"
+	download_src
+	ass_rst $? 0 "download_src failed!"
 
-		compile_and_install
-		ass_rst $? 0 "compile_and_install failed!"
+	compile_and_install
+	ass_rst $? 0 "compile_and_install failed!"
 
-		selftest
-		ass_rst $? 0 "selftest failed!"
+	selftest
+	ass_rst $? 0 "selftest failed!"
 
-		finish_install
-		ass_rst $? 0 "finish_install failed"
+	finish_install
+	ass_rst $? 0 "finish_install failed"
 }
 
 pr_tip "-------- software compile and install start --------"
