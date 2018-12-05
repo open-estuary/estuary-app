@@ -4,7 +4,7 @@
 ## template:    V01
 ## Author:      XiaoJun x00467495
 ## name:        systemtap
-## desc:        systemtap source code compile and install
+## desc:        systemtap source code compile and install, only for kernel-4.19.5 rc3
 
 ### RULE
 ## 1. update Header info
@@ -105,7 +105,7 @@ function check_distribution()
 	elif grep -Eqi "Debian" /etc/issue || grep -Eq "Debian" /etc/*-release; then
 		DISTRIBUTION='Debian'
 	else
-				DISTRIBUTION='unknown'
+		DISTRIBUTION='unknown'
 	fi
 
 	pr_tip "Distribution : ${DISTRIBUTION}"
@@ -125,8 +125,14 @@ function clear_history()
 ## Interface: install dependency
 function install_depend()
 {
-	if [ ! -f /usr/sr/kernels/`uname -r`/arch/arm64/kernel/modules.lds ] ; then
+	# patch for CentOS
+	if [ ! -f /usr/src/kernels/`uname -r`/arch/arm64/kernel/modules.lds ] ; then
 		cp patch/systemtap/module.lds /usr/src/kernels/`uname -r`/arch/arm64/kernel/
+	fi
+
+	# patch for Debian
+	if [ ! -f /usr/src/linux-headers-4.19.0-8-common/srcipts/subarch.include ] ; then
+		cp patch/systemtap/subarch.include /usr/src/linux-headers-4.19.0-8-common/scripts/
 	fi
 
 	if [ "$DISTRIBUTION"x == "Debian"x ] ; then

@@ -130,7 +130,8 @@ function download_src()
 {
 
 	if [ ! -f ${MY_SRC_TAR} ] ; then
-		wget ${SRC_URL}
+		cp patch/cryptopp/${MY_SRC_TAR} ./
+#		wget ${SRC_URL}
 		ass_rst $? 0 "wget ${SRC_URL} failed!"
 	fi
 
