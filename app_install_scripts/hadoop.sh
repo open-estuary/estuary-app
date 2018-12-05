@@ -163,7 +163,7 @@ function download_src()
 	fi
 	cd /home/test/hadoop
 	echo "download hadoop,Please wait... "
-	wget -q -c  http://mirror.bit.edu.cn/apache/hadoop/common/hadoop-${version}/hadoop-${version}.tar.gz
+	wget --no-check-certificate  http://mirror.bit.edu.cn/apache/hadoop/common/hadoop-${version}/hadoop-${version}.tar.gz
 	ass_rst $? 0 "download failed"
 	tar -xf hadoop-${version}.tar.gz
 	
