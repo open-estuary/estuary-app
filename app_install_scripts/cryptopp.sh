@@ -20,8 +20,8 @@ MCOLOR_GREEN="\033[32m"
 MCOLOR_YELLOW="\033[33m"
 MCOLOR_END="\033[0m"
 # Color Macro End
-
-SRC_URL="http://192.168.50.122:8083/test_dependents/cryptopp-CRYPTOPP_5_6_5.zip"
+#SRC_URL="http://192.168.50.122:8083/test_dependents/cryptopp-CRYPTOPP_5_6_5.zip"
+SRC_URL=NULL #copy zip file from patch dir now.
 PKG_URL=NULL
 DISTRIBUTION=NULL
 rst=0
@@ -132,7 +132,7 @@ function download_src()
 	if [ ! -f ${MY_SRC_TAR} ] ; then
 		cp patch/cryptopp/${MY_SRC_TAR} ./
 #		wget ${SRC_URL}
-		ass_rst $? 0 "wget ${SRC_URL} failed!"
+		ass_rst $? 0 "get ${MY_SRC_TAR} failed!"
 	fi
 
 	unzip ${MY_SRC_TAR}

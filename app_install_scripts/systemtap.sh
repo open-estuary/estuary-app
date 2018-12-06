@@ -20,13 +20,14 @@ MCOLOR_GREEN="\033[32m"
 MCOLOR_YELLOW="\033[33m"
 MCOLOR_END="\033[0m"
 # Color Macro End
-
-SRC_URL="git://sourceware.org/git/systemtap.git"
+# SRC_URL="git://sourceware.org/git/systemtap.git"
+SRC_RUL=NULL # use local src tar instead of src in official web
 PKG_URL=NULL
 DISTRIBUTION=NULL
 rst=0
 
 ## Selfdef Varis
+MY_SRC_TAR=systemtap.tar.bz2
 MY_SRC_DIR=systemtap
 # MY_SRC_TAR
 MY_CENTOS_DEPEND="kernel kernel-devel kernel-debuginfo elfutils-devel"
@@ -152,8 +153,13 @@ function install_depend()
 function download_src()
 {
 
-	git clone ${SRC_URL}
-	ass_rst $? 0 "git clone failed!"
+	#git clone ${SRC_URL}
+	#ass_rst $? 0 "git clone failed!"
+	cp patch/systemtap/${MY_SRC_TAR} ./
+	ass_rst $? 0 "get systemtap.tar.bz2 failed"
+
+	tar xvjf ${MY_SRC_TAR}
+	ass_rst $? 0 "untar failed!"
 
 	cd ${MY_SRC_DIR}
 	ass_rst $? 0 "cd ${MY_SRC_DIR} failed!"
@@ -210,6 +216,7 @@ function selftest()
 function finish_install()
 {
 	cd ../
+	rm -rf ${MY_SRC_TAR}
 	rm -rf ${MY_SRC_DIR}
 
 	pr_ok "[finish]<clean> OK"
