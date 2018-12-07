@@ -26,6 +26,7 @@ PKG_URL=NULL
 DISTRIBUTION=NULL
 rst=0
 version='2.7.6'
+testhome=/opt
 
 ## Selfdef Varis
 # MY_SRC_DIR
@@ -138,10 +139,11 @@ case $DISTRIBUTION in
  ass_rst $? 0 "install dependence failed"
  
 	
-    if [ ! -f "/usr/lib/jvm/java-1.8.0-openjdk-arm64" ];then
-		echo ""
+	if [ ! -d "/usr/lib/jvm/java-1.8.0-openjdk-arm64" ]; then
+		pr_tip "no /usr/lib/jvm/java-1.8.0-openjdk-arm64 found"
 	else
-		mv /usr/lib/jvm/java-1.8.0-openjdk-arm64  /usr/lib/jvm/java-1.8.0-openjdk
+#		mv /usr/lib/jvm/java-1.8.0-openjdk-arm64  /usr/lib/jvm/java-1.8.0-openjdk #do not use mv 
+		ln -s -T /usr/lib/jvm/java-1.8.0-openjdk-arm64 /usr/lib/jvm/java-1.8.0-openjdk
 	fi
 	sed -i "/JAVA_HOME/d" ~/.bashrc
     echo "export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk" >> ~/.bashrc
@@ -155,15 +157,15 @@ case $DISTRIBUTION in
 ## Interface: download_src
 function download_src()
 {
-	if [ -d "/home/test/hadoop" ];then
-		rm -rf /home/test/hadoop
-		mkdir -p /home/test/hadoop
+	if [ -d "$testhome/hadoop" ];then
+		rm -rf $testhome/hadoop
+		mkdir -p $testhome/hadoop
 	else
-		mkdir -p /home/test/hadoop
+		mkdir -p $testhome/hadoop
 	fi
-	cd /home/test/hadoop
-	echo "download hadoop,Please wait... "
-	wget --no-check-certificate  http://mirror.bit.edu.cn/apache/hadoop/common/hadoop-${version}/hadoop-${version}.tar.gz
+	cd $testhome/hadoop
+	#echo "download hadoop,Please wait... "
+	wget -O hadoop-${version}.tar.gz --no-check-certificate  http://mirror.bit.edu.cn/apache/hadoop/common/hadoop-${version}/hadoop-${version}.tar.gz
 	ass_rst $? 0 "download failed"
 	tar -xf hadoop-${version}.tar.gz
 	
@@ -266,7 +268,7 @@ EOF
     </property>
 </configuration>
 EOF
-	#rm -rf /tmp/hadoop-root
+	rm -rf /tmp/hadoop-root
 	$HADOOP_HOME/bin/hdfs namenode -format
 	$HADOOP_HOME/sbin/start-dfs.sh
 	$HADOOP_HOME/sbin/start-yarn.sh

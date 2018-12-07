@@ -25,8 +25,13 @@ SRC_URL=NULL
 PKG_URL=NULL
 DISTRIBUTION=NULL
 rst=0
-spark=/home/test/spark/spark-2.3.0-bin-hadoop2.7
-localhost=172.31.31.116
+testhome=/opt
+spark=$testhome/spark/spark-2.3.0-bin-hadoop2.7
+localhost=172.19.18.66
+
+#hadoop version
+version='2.7.6'
+
 ## Selfdef Varis
 # MY_SRC_DIR
 # MY_SRC_TAR
@@ -100,12 +105,12 @@ function ass_rst()
 function check_distribution()
 {
 	if grep -Eqi "CentOS" /etc/issue || grep -Eq "CentOS" /etc/*-release; then
-		DISTRIBUTION='CentOS'
-	elif grep -Eqi "Debian" /etc/issue || grep -Eq "Debian" /etc/*-release; then
-		DISTRIBUTION='Debian'
-	else
+        DISTRIBUTION='CentOS'
+    elif grep -Eqi "Debian" /etc/issue || grep -Eq "Debian" /etc/*-release; then
+        DISTRIBUTION='Debian'
+    else
 		DISTRIBUTION='unknown'
-	fi
+    fi
 
 	pr_tip "Distribution : ${DISTRIBUTION}"
 
@@ -122,46 +127,51 @@ function clear_history()
 ## Interface: install dependency
 function install_depend()
 {
+    cp ./hadoop.sh $testhome
 scala -version
 if [ $? -eq 0 ] ;then
 echo -e "scala  already installed.\n"
 else
-	
-   mkdir -p /usr/local/scala
-   cd /usr/local/scala
-   wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" https://downloads.typesafe.com/scala/2.11.8/scala-2.11.8.tgz
-   tar -zxf scala-2.11.8.tgz
-   echo "export SCALA_HOME="/usr/local/scala/scala-2.11.8"" >> /etc/profile
-   echo "export PATH=$PATH:$SCALA_HOME/bin/" >> /etc/profile
-   source /etc/profile  
+    mkdir -p /usr/local/scala
+    cd /usr/local/scala
+    wget -O scala-2.11.8.tgz --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" https://downloads.typesafe.com/scala/2.11.8/scala-2.11.8.tgz
+    tar -zxf scala-2.11.8.tgz
+    echo "export SCALA_HOME="/usr/local/scala/scala-2.11.8"" >> /etc/profile
+    echo "export PATH=$PATH:$SCALA_HOME/bin/" >> /etc/profile
+    source /etc/profile  
 fi
-	cd /home/test
-	./hadoop.sh
-	return $?
+
+    cd $testhome
+    ./hadoop.sh
+    ass_rst $? 0 "install hadoop failed!"
+
+    rm -f $testhome/hadoop.sh
+
+    return $?
 }
 
 ## Interface: download_src
 function download_src()
 {
-ls -l /home/test/spark
+   ls -l $testhome/spark
 if [ $? -eq 0 ];then
    pr_tip "spark exists"
- rm -rf /home/test/spark
-   mkdir -p /home/test/spark
+   rm -rf $testhome/spark
+   mkdir -p $testhome/spark
 else
-   mkdir -p  /home/test/spark
+   mkdir -p  $testhome/spark
 fi
-   cd /home/test/spark
-   echo "download spark ,Please wait..."
-   wget --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie"  https://archive.apache.org/dist/spark/spark-2.3.0/spark-2.3.0-bin-hadoop2.7.tgz
+   cd $testhome/spark
+   echo"download spark ,Please wait..."
+   wget -O spark-2.3.0-bin-hadoop2.7.tgz --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie"  https://archive.apache.org/dist/spark/spark-2.3.0/spark-2.3.0-bin-hadoop2.7.tgz
    tar -zxf spark-2.3.0-bin-hadoop2.7.tgz
 
 	hdfs dfs -mkdir -p /tmp/spark/events
 	cp $spark/conf/spark-env.sh.template $spark/conf/spark-env.sh
 	echo "export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk" >> $spark/conf/spark-env.sh
-	echo "export SPARK_MASTER_IP=172.19.18.66" >> $spark/conf/spark-env.sh
+	echo "export SPARK_MASTER_IP=$localhost" >> $spark/conf/spark-env.sh
 	echo "export SPARK_WORKER_MEMORY=384G" >> $spark/conf/spark-env.sh
-	echo "export SPARK_DIST_CLASSPATH=$(/home/test/hadoop/hadoop-2.7.6/bin/hadoop classpath)" >> $spark/conf/spark-env.sh
+	echo "export SPARK_DIST_CLASSPATH=$($testhome/hadoop/hadoop-${version}/bin/hadoop classpath)" >> $spark/conf/spark-env.sh
 	echo "export SPARK_HISTORY_OPTS="-Dspark.history.ui.port=18080 -Dspark.history.fs.logDirectory=hdfs://$localhost:9000/tmp/spark/events"" >> $spark/conf/spark-env.sh
 	cp $spark/conf/spark-defaults.conf.template $spark/conf/spark-defaults.conf
 	echo "# spark history、log dir etc.
@@ -178,19 +188,17 @@ spark.yarn.scheduler.heartbeat.interval-ms   120
 spark.executor.heartbeatInterval           120 
 spark.network.timeout                   600 " >> $spark/conf/spark-defaults.conf
 	
+	
 	grep HADOOP_HOME ~/.bashrc 
 	if [ $? -eq 0 ];then
 		sed -i "/SPARK_HOME/d" ~/.bashrc	
 	fi
-	export HADOOP_HOME=/home/test/spark/spark-2.3.0-bin-hadoop2.7
-	echo "export HADOOP_HOME=/home/test/spark/spark-2.3.0-bin-hadoop2.7" >> ~/.bashrc
+	export HADOOP_HOME=$spark
+	echo "export HADOOP_HOME=$spark" >> ~/.bashrc
 	echo 'export PATH=$PATH:$SPARK_HOME/bin' >> ~/.bashrc
 	source ~/.bashrc > /dev/null 2>&1 
 
 
-	#export SPARK_HOME=/home/test/spark/spark-2.3.0-bin-hadoop2.7
-	#export PATH=$PATH:$SPARK_HOME/bin/:$SPARK_HOME/sbin
-	#echo $PATH
 	cd $spark/sbin
 	./start-all.sh
 	./start-history-server.sh
@@ -201,18 +209,18 @@ spark.network.timeout                   600 " >> $spark/conf/spark-defaults.conf
 ## example: print version number, run any simple example
 function selftest()
 {
-	cd ${spark}/bin
-	./run-example SparkPi
-	cd /home/test/hadoop/hadoop-2.7.6/sbin
+cd ${spark}/bin
+./run-example SparkPi
+
+cd $testhome/hadoop/hadoop-${version}/sbin
 	./stop-all.sh
-	
 	return $?
 }
 
 ## Interface: compile_and_install
 function compile_and_install()
 {
-	
+    
 	return $?
 }
 

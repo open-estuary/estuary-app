@@ -141,12 +141,15 @@ function compile_and_install()
 
 	if [ "$DISTRIBUTION"x == "Debian"x ] ; then
 		pr_info "install using apt-get"
-		apt-get install -y docker
-	    pr_ok "[compile]<install> ok"
+		apt-get install -y curl
+		curl -fsSL get.docker.com -o get-docker.sh
+		sh get-docker.sh --mirror Aliyun
+		pr_tip "install-docker:$?"
+		pr_ok "[compile]<install> ok"
 	elif [ "$DISTRIBUTION"x == "CentOS"x ] ; then
 		pr_info "install using yum"
 		yum --setopt=skip_missing_names_on_install=False install -y docker
-	    pr_ok "[compile]<install> ok"
+		pr_ok "[compile]<install> ok"
 	fi
 	ass_rst $? 0 "install failed"
 	pr_tip "[install]<install>"

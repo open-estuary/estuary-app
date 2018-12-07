@@ -26,7 +26,11 @@ PKG_URL=NULL
 DISTRIBUTION=NULL
 rst=0
 hive=apache-hive-2.3.3-bin
-hive_binary_dir=/home/test/hive
+testhome=/opt
+
+#hadoop version
+version='2.7.6'
+
 ## Selfdef Varis
 # MY_SRC_DIR
 # MY_SRC_TAR
@@ -121,24 +125,27 @@ function clear_history()
 
 ## Interface: install dependency
 function install_depend()
-{ cd /home/test
-  ./hadoop.sh
+{
+	./hadoop.sh
+	ass_rst $? 0 "hadoop install failed!"
+
+	cd $testhome
 	return $?
 }
 
 ## Interface: download_src
 function download_src()
 {
-if [ -d "$hive_binary_dir" ];then
-	rm -rf $hive_binary_dir
-	mkdir -p $hive_binary_dir
+if [ -d "$testhome/hive" ];then
+	rm -rf $testhome/hive
+	mkdir -p $testhome/hive
 else
-	mkdir -p $hive_binary_dir
+	mkdir -p $testhome/hive
 fi
-	pushd  $hive_binary_dir
-	cd  $hive_binary_dir
+	pushd  $testhome/hive
+	cd  $testhome/hive
 	echo "download hive ,Please wait..."
-	wget --no-check-certificate http://archive.apache.org/dist/hive/hive-2.3.3/${hive}.tar.gz
+	wget -O ${hive}.tar.gz --no-check-certificate http://archive.apache.org/dist/hive/hive-2.3.3/${hive}.tar.gz
 	ass_rst $? 0 "download failed"
 	tar -xf ${hive}.tar.gz
 	
@@ -154,10 +161,10 @@ fi
 	</property>
 	<property>
 		<name>javax.jdo.option.ConnectionURL</name>
-		<value>jdbc:derby:/home/test/hive/apache-hive-2.3.3-bin/metastore_db;create=true</value>
+		<value>jdbc:derby:$testhome/hive/${hive}/metastore_db;create=true</value>
 		<description>JDBC connect string for a JDBC metastore</description>
 	</property>
-</configuration>' > $hive_binary_dir/${hive}/conf/hive-site.xml
+</configuration>' > $testhome/hive/${hive}/conf/hive-site.xml
         sed -i "/HIVE_HOME/d" ~/.bashrc
         export HIVE_HOME=$hivedir &&
         echo "export HIVE_HOME=$hivedir" >> ~/.bashrc &&
@@ -176,15 +183,14 @@ hive -e "create table test1(a int,b string) row format delimited fields terminat
 	if [ $? -eq 0 ];then
 		pr_tip "[hive] Successed:hive_create_table successed."
 	fi
-	hive -e "drop table test1;"
+hive -e "drop table test1;"
 
 	hdfs dfs -rm -f -r /user/hive/warehouse
 	hdfs dfs -rm -f -r /user/hive/tmp
 	hdfs dfs -rm -f -r /user/hive/log
-	
-	cd /home/test/hadoop/hadoop-2.7.6/sbin
-	./stop-all.sh
 
+	cd $testhome/hadoop/hadoop-${version}/sbin
+	./stop-all.sh
 	return $?
 
 }
@@ -198,9 +204,9 @@ function compile_and_install()
     hdfs dfs -chmod -R 777 /user/hive/warehouse
     hdfs dfs -chmod -R 777 /user/hive/tmp
     hdfs dfs -chmod -R 777 /user/hive/log
-
-	cd $hive_binary_dir/${hive}/bin
-	schematool -initSchema -dbType derby
+	
+	cd $testhome/hive/${hive}/bin
+    schematool -initSchema -dbType derby
 	ass_rst $? 0 "schematool -db successed"
 }
 
