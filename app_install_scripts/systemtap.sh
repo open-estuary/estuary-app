@@ -126,6 +126,14 @@ function clear_history()
 ## Interface: install dependency
 function install_depend()
 {
+	if [ "$DISTRIBUTION"x == "Debian"x ] ; then
+		apt-get install -y ${MY_DEBIAN_DEPEND}
+		ass_rst $? 0 "install depend failed!"
+	elif [ "$DISTRIBUTION"x == "CentOS"x ] ; then
+		yum install -y ${MY_CENTOS_DEPEND} --setopt=skip_missing_names_on_install=False
+		ass_rst $? 0 "install depend failed!"
+	fi
+
 	# patch for CentOS
 	if [ ! -f /usr/src/kernels/`uname -r`/arch/arm64/kernel/modules.lds ] ; then
 		cp patch/systemtap/module.lds /usr/src/kernels/`uname -r`/arch/arm64/kernel/
@@ -135,15 +143,6 @@ function install_depend()
 	if [ ! -f /usr/src/linux-headers-4.19.0-8-common/srcipts/subarch.include ] ; then
 		cp patch/systemtap/subarch.include /usr/src/linux-headers-4.19.0-8-common/scripts/
 	fi
-
-	if [ "$DISTRIBUTION"x == "Debian"x ] ; then
-		apt-get install -y ${MY_DEBIAN_DEPEND}
-		ass_rst $? 0 "install depend failed!"
-	elif [ "$DISTRIBUTION"x == "CentOS"x ] ; then
-		yum install -y ${MY_CENTOS_DEPEND} --setopt=skip_missing_names_on_install=False
-		ass_rst $? 0 "install depend failed!"
-	fi
-
 
 	pr_tip "[depend] skiped"
 	return 0

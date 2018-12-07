@@ -27,6 +27,7 @@ DISTRIBUTION=NULL
 rst=0
 hive=apache-hive-2.3.3-bin
 testhome=/opt
+LOCAL_SRC_DIR="192.168.1.107/src_collection"
 
 #hadoop version
 version='2.7.6'
@@ -145,8 +146,11 @@ fi
 	pushd  $testhome/hive
 	cd  $testhome/hive
 	echo "download hive ,Please wait..."
-	wget -O ${hive}.tar.gz --no-check-certificate http://archive.apache.org/dist/hive/hive-2.3.3/${hive}.tar.gz
-	ass_rst $? 0 "download failed"
+	wget -T 10 -O ${hive}.tar.gz ${LOCAL_SRC_DIR}/${hive}.tar.gz
+	if [ $? -ne 0 ] ; then
+		wget -O ${hive}.tar.gz --no-check-certificate http://archive.apache.org/dist/hive/hive-2.3.3/${hive}.tar.gz
+		ass_rst $? 0 "download failed"
+	fi
 	tar -xf ${hive}.tar.gz
 	
 	

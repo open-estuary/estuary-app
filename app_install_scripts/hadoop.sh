@@ -27,6 +27,7 @@ DISTRIBUTION=NULL
 rst=0
 version='2.7.6'
 testhome=/opt
+LOCAL_SRC_DIR="192.168.1.107/src_collection"
 
 ## Selfdef Varis
 # MY_SRC_DIR
@@ -165,8 +166,11 @@ function download_src()
 	fi
 	cd $testhome/hadoop
 	#echo "download hadoop,Please wait... "
-	wget -O hadoop-${version}.tar.gz --no-check-certificate  http://mirror.bit.edu.cn/apache/hadoop/common/hadoop-${version}/hadoop-${version}.tar.gz
-	ass_rst $? 0 "download failed"
+	wget -T 10 -O hadoop-${version}.tar.gz ${LOCAL_SRC_DIR}/hadoop-${version}.tar.gz
+	if [ $? -ne 0 ] ; then
+		wget -O hadoop-${version}.tar.gz --no-check-certificate  http://mirror.bit.edu.cn/apache/hadoop/common/hadoop-${version}/hadoop-${version}.tar.gz
+		ass_rst $? 0 "download failed"
+	fi
 	tar -xf hadoop-${version}.tar.gz
 	
 	pushd hadoop-${version}

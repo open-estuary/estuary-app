@@ -28,6 +28,7 @@ rst=0
 testhome=/opt
 spark=$testhome/spark/spark-2.3.0-bin-hadoop2.7
 localhost=172.19.18.66
+LOCAL_SRC_DIR="192.168.1.107/src_collection"
 
 #hadoop version
 version='2.7.6'
@@ -134,7 +135,10 @@ echo -e "scala  already installed.\n"
 else
     mkdir -p /usr/local/scala
     cd /usr/local/scala
-    wget -O scala-2.11.8.tgz --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" https://downloads.typesafe.com/scala/2.11.8/scala-2.11.8.tgz
+    wget -T 10 -O scala-2.11.8.tgz ${LOCAL_SRC_DIR}/scala-2.11.8.tgz
+    if [ $? -ne 0 ] ; then
+        wget -O scala-2.11.8.tgz --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" https://downloads.typesafe.com/scala/2.11.8/scala-2.11.8.tgz
+    fi
     tar -zxf scala-2.11.8.tgz
     echo "export SCALA_HOME="/usr/local/scala/scala-2.11.8"" >> /etc/profile
     echo "export PATH=$PATH:$SCALA_HOME/bin/" >> /etc/profile
@@ -163,7 +167,10 @@ else
 fi
    cd $testhome/spark
    echo"download spark ,Please wait..."
-   wget -O spark-2.3.0-bin-hadoop2.7.tgz --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie"  https://archive.apache.org/dist/spark/spark-2.3.0/spark-2.3.0-bin-hadoop2.7.tgz
+   wget -T 10 -O spark-2.3.0-bin-hadoop2.7.tgz ${LOCAL_SRC_DIR}/spark-2.3.0-bin-hadoop2.7.tgz
+   if [ $? -ne 0 ] ; then
+       wget -O spark-2.3.0-bin-hadoop2.7.tgz --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie"  https://archive.apache.org/dist/spark/spark-2.3.0/spark-2.3.0-bin-hadoop2.7.tgz
+   fi
    tar -zxf spark-2.3.0-bin-hadoop2.7.tgz
 
 	hdfs dfs -mkdir -p /tmp/spark/events
