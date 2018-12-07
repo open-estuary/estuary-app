@@ -198,7 +198,13 @@ function rst_report()
 ## Interface: finish install
 function finish_install()
 {
-	pr_tip "[finish]<clean> skiped"
+	if [ "$DISTRIBUTION"x == "Debian"x ] ; then
+		cd ..
+		rm -rf $filename
+		pr_ok "[finish]<clean> ok"
+	elif [ "$DISTRIBUTION"x == "CentOS"x ] ; then
+		pr_tip "[finish]<clean> skiped"
+	fi
 	return 0
 }
 

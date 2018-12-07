@@ -128,7 +128,7 @@ function install_depend()
 ## Interface: download_src
 function download_src()
 {
-	wget ${SRC_URL} --no-check-certificate
+	wget -O ${MY_SRC_TAR} ${SRC_URL} --no-check-certificate
 	ass_rst $? 0 "download ${SRC_URL} failed!"
 
 	tar xvzf ${MY_SRC_TAR}
@@ -168,6 +168,10 @@ function compile_and_install()
 
 	make install
 	ass_rst $? 0 "make install failed"
+
+	if [ ! -f /usr/bin/netperf ] ; then
+		cp src/netperf /usr/bin/ -f	
+	fi
 
 	pr_ok "[install]<compile> OK"
 
