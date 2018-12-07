@@ -123,7 +123,17 @@ function install_depend()
 {
 	
 	if [ "${DISTRIBUTION}"x == "CentOS"x ] ; then
-		yum install -y mysql-community-libs-compat-8.0.13-1.el7.aarch64.rpm --setopt=skip_missing_names_on_install=False
+#		yum install -y mysql-community-libs-compat-8.0.13-1.el7.aarch64.rpm --setopt=skip_missing_names_on_install=False
+		if [ ! -f "/etc/yum.repos.d/mysql-community.repo" ] ; then
+			cp patch/sysbench/* /etc/yum.repos.d/
+			yum clean dbcache
+			yum makecache
+		fi
+		if [ ! -f "/etc/pki/rpm-gpg/RPM-GPG-KEY-mysql" ] ; then
+			cp patch/sysbench/RPM-GPG-KEY-mysql /etc/pki/rpm-gpg/RPM-GPG-KEY-mysql
+		fi
+
+		yum install -y mysql-community-libs-compat libpqxx --setopt=skip_missing_names_on_install=False
 		ass_rst $? 0 "yum install failed!"
 		
 		pr_ok "[depend] OK"
