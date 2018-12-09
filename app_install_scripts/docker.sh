@@ -145,6 +145,7 @@ function compile_and_install()
 		curl -fsSL get.docker.com -o get-docker.sh
 		sh get-docker.sh --mirror Aliyun
 		pr_tip "install-docker:$?"
+		rm -rf get-docker.sh
 		pr_ok "[compile]<install> ok"
 	elif [ "$DISTRIBUTION"x == "CentOS"x ] ; then
 		pr_info "install using yum"

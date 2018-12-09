@@ -182,7 +182,10 @@ function selftest()
 ## Interface: finish install
 function finish_install()
 {
-	pr_tip "[finish]<clean> skiped"
+	cd ..
+	rm -rf ${MY_SRC_DIR} ${MY_SRC_TAR}
+
+	pr_ok "[finish]<clean> ok"
 	return 0
 }
 

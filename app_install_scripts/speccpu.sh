@@ -28,6 +28,7 @@ rst=0
 package=speccpu
 version=2006
 filename=$package$version
+tmp_dir=NULL
 
 ## Selfdef Varis
 # MY_SRC_DIR
@@ -154,6 +155,7 @@ function download_src()
 	SRC_PATH=/home/mahongxin/$filename.tar.gz
 	PASSWD=123456
 	mkdir $package
+	tmp_dir=${PWD}
 	expect<<-EOF
 	set timeout 1200
 	spawn scp $SRC_IP:$SRC_PATH ./ 
@@ -207,8 +209,9 @@ function rst_report()
 ## Interface: finish install
 function finish_install()
 {
-
-	pr_tip "[finish]<clean> skiped"
+	cd ${tmp_dir}
+	rm -rf speccpu
+	pr_ok "[finish]<clean> ok"
 	return 0
 }
 

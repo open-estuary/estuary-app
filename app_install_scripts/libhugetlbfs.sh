@@ -143,6 +143,7 @@ function compile_and_install()
 		echo "deb http://ftp.de.debian.org/debian sid main">>/etc/apt/sources.list.d/sid.list
 		ass_rst $? 0 "add sid source failed"
 		pr_info "install using apt-get"
+		apt update
 		apt-get -t sid install -y libhugetlbfs-dev
 		ass_rst $? 0 "install failed"
 		rm /etc/apt/sources.list.d/sid.list

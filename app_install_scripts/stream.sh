@@ -179,7 +179,8 @@ function rst_report()
 ## Interface: finish install
 function finish_install()
 {
-	pr_tip "[finish]<clean> skipped"
+	rm -rf stream.c
+	pr_ok "[finish]<clean> ok"
 	return 0
 }
 

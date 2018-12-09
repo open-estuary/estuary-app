@@ -28,6 +28,7 @@ rst=0
 package=workload-automation
 version=3.0.0
 filename=$package-$version
+tmp_dir=NULL
 
 ## Selfdef Varis
 # MY_SRC_DIR
@@ -109,6 +110,8 @@ function check_distribution()
 		DISTRIBUTION='unknown'
 	fi
 
+	tmp_dir=${PWD}
+
 	pr_tip "Distribution : ${DISTRIBUTION}"
 
 	return 0
@@ -185,7 +188,10 @@ function rst_report()
 ## Interface: finish install
 function finish_install()
 {
-	pr_tip "[finish]<clean> skiped"
+	cd ${tmp_dir}
+	rm -rf ${filename}
+
+	pr_ok "[finish]<clean> ok"
 	return 0
 }
 
