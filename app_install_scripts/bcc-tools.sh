@@ -28,7 +28,7 @@ rst=0
 package=bcc
 version=0.7.0
 filename=$package-$version
-
+num_of_cores=1
 ## Selfdef Varis
 # MY_SRC_DIR
 # MY_SRC_TAR
@@ -141,9 +141,9 @@ function install_depend()
 			ass_rst $? 0 "download luajit source failed"
 			tar -xf $LUA
 			cd $LUA
-			make PREFIX=/usr && sudo make install PREFIX=/usr
+			make -j$num_of_cores PREFIX=/usr 
 			ass_rst $? 0 "build lua failed"
-			make install
+			make install PREFIX=/usr
 			ass_rst $? 0 "install lua failed"
 			ln -sf luajit-2.1.0-beta3 /usr/local/bin/luajit
 			cd -
@@ -157,7 +157,7 @@ function install_depend()
 			cd netperf-$NETPERF
 			./configure -build=alpha 
 			ass_rst $? 0 "configure netperf failed"
-			make
+			make -j$num_of_cores
 			ass_rst $? 0 "build netperf failed"
 			make install
 			ass_rst $? 0 "install netperf failed"
@@ -184,7 +184,7 @@ function install_depend()
 			cd llvm-build
 			cmake3 -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD="BPF;X86;AArch64" ../llvm-6.0.0.src
 			ass_rst $? 0 "llvm configure failed"
-			make
+			make -j$num_of_cores
 			ass_rst $? 0 "llvm build failed"
 			make install
 			ass_rst $? 0 "llvm install failed"
@@ -261,7 +261,7 @@ function compile_and_install()
 		cmake3 .. -DCMAKE_INSTALL_PREFIX=/usr
 	fi
 	ass_rst $? 0 "bcc configure failed"
-	make
+	make -j$num_of_cores
 	ass_rst $? 0 "bcc build failed"
 	make install
 	ass_rst $? 0 "bcc install failed"
