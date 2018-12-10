@@ -172,7 +172,7 @@ function compile_and_install()
 	rm $filename.tar.gz	
 	pr_tip "[install]<compile> NULL"
 	pr_tip "[install]<install>"
-	grep -c "http:\/\/cmc-cd-mirror.rnd.huawei.com\/maven\/" /etc/maven/settings.xml
+	grep -c "http:\/\/maven.aliyun.com\/nexus\/content\/groups\/public\/" /etc/maven/settings.xml
 	if [ "$?"x -eq "0"x ]; then
 		pr_tip "sources mirror test pass"
 	else
