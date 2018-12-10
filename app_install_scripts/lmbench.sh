@@ -155,7 +155,29 @@ function download_src()
 ## example: print version number, run any simple example
 function selftest()
 {
-	pr_tip "[selftest] check results"
+	pr_tip "[selftest] show results"
+	make see
+	return $?
+}
+
+## Interface: compile_and_install
+function compile_and_install()
+{
+	
+	pr_tip "[install]<version> $version"
+	pr_tip "[install]<rm_git> "
+	rm $filename.tar.gz	
+	pr_tip "[install]<compile> NULL"
+
+	patch -p0 < patch/lmbench/lmbench3-uclibc-llseek.patch
+	ass_rst $? 0 "modify using patch failed"	
+
+	cd $filename
+	sed -i "s%$O/lmbench : ../scripts/lmbench bk.ver%$O/lmbench : ../scripts/lmbench%g" src/Makefile
+	ass_rst $? 0 "modify makefile failed"
+	cp ../patch/lmbench/gnu-os scripts/
+	ass_rst $? 0 "copy gnu-os fail"
+
 	expect<<-EOF
 	set timeout 300000
 	spawn make results
@@ -185,22 +207,7 @@ function selftest()
 	send "n\r"
 	expect "Leaving directory '${url}/src'"	
 	EOF
-	return $?
-}
 
-## Interface: compile_and_install
-function compile_and_install()
-{
-	
-	pr_tip "[install]<version> $version"
-	pr_tip "[install]<rm_git> "
-	rm $filename.tar.gz	
-	pr_tip "[install]<compile> NULL"
-	cd $filename
-	sed -i "s%$O/lmbench : ../scripts/lmbench bk.ver%$O/lmbench : ../scripts/lmbench%g" src/Makefile
-	ass_rst $? 0 "modify makefile failed"
-	cp ../patch/lmbench/gnu-os scripts/
-	ass_rst $? 0 "copy gnu-os fail"
 	return $?
 }
 
