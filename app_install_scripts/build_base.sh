@@ -153,7 +153,7 @@ function compile_and_install()
 		pr_ok "[depend] ok"
 	elif [ "$DISTRIBUTION"x == "CentOS"x ] ; then
 		yum install -y make git gcc gcc-c++  autoconf automake maven java-1.8.0-openjdk cmake --setopt=skip_missing_names_on_install=False
-		yum install -y unzip --setopt=skip_missing_names_on_install=False
+		yum install -y unzip bzip2 --setopt=skip_missing_names_on_install=False
 		pr_ok "[depend] ok"
 	fi
 

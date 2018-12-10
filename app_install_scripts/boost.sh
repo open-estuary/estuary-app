@@ -20,7 +20,7 @@ MCOLOR_GREEN="\033[32m"
 MCOLOR_YELLOW="\033[33m"
 MCOLOR_END="\033[0m"
 # Color Macro End
-
+LOCAL_SRC_DIR="192.168.1.107/src_collection"
 SRC_URL="http://downloads.sourceforge.net/project/boost/boost/1.63.0/boost_1_63_0.tar.bz2?r=http%3A%2F%2Fwww.boost.org%2Fusers%2Fhistory%2Fversion_1_63_0.html&ts=1375162670&use_mirror=jaist"
 PKG_URL=NULL
 DISTRIBUTION=NULL
@@ -124,6 +124,14 @@ function clear_history()
 function install_depend()
 {
 	rm -rf ${MY_SRC_DIR}
+	if [ "${DISTRIBUTION}"x == "Debian"x ] ; then
+		apt-get install -y python-dev
+		ass_rst $? 0 "apt-get install failed!"
+	elif [ "${DISTRIBUTION}"x == "CentOS"x  ] ; then
+		yum install -y python-devel
+		ass_rst $? 0 "yum install failed!"
+	fi
+	
 	
 	pr_ok "[depend] ok"
 	return 0
@@ -132,7 +140,8 @@ function install_depend()
 ## Interface: download_src
 function download_src()
 {
-	if [ ! -f "${MY_SRC_TAR}" ] ; then
+	wget -T 10 -O boost_1_63_0.tar.bz2 ${LOCAL_SRC_DIR}/boost_1_63_0.tar.bz2
+	if [ $? -ne 0 ] ; then
 		wget -O ${MY_SRC_TAR} ${SRC_URL}
 		ass_rst $? 0 "wget ${SRC_URL} failed!"
 	fi
@@ -157,7 +166,7 @@ function compile_and_install()
 	ass_rst $? 0 "run bootstrap.sh failed!"
 	
 	./b2 install
-	ass_rst $? 0 "run b2 install failed!"
+	ass_rst $? 0 "run b2 install failed!, return $?"
 
 	pr_ok "[install]<compile> OK"
 

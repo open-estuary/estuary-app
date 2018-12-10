@@ -27,8 +27,9 @@ DISTRIBUTION=NULL
 rst=0
 
 ## Selfdef Varis
-MY_SRC_DIR="grafana-5.2.0"
-MY_SRC_TAR="grafana-5.2.0.tar.gz"
+#MY_SRC_DIR
+#MY_SRC_TAR
+LOCAL_SRC_DIR="192.168.1.107/src_collection"
 
 ### internal API ###
 
@@ -146,17 +147,28 @@ function compile_and_install()
 	pr_tip "[install]<compile> skiped"
 
 	if [ "$DISTRIBUTION"x == "Debian"x ] ; then
-#		wget -O grafana_5.3.4_arm64.deb https://d1.grafana.com/oss/release/grafana_5.3.4_arm64.deb
-		wget -O grafana_5.3.4_arm64.deb https://dl.grafana.com/oss/release/grafana_5.3.4_arm64.deb
-		ass_rst $? 0 "wget failed!"
+		wget -T 10 -O grafana_5.3.4_arm64.deb ${LOCAL_SRC_DIR}/grafana_5.3.4_arm64.deb
+		if [ $? -ne 0 ] ; then
+			wget -O grafana_5.3.4_arm64.deb https://dl.grafana.com/oss/release/grafana_5.3.4_arm64.deb
+			ass_rst $? 0 "wget failed!"
+		fi
 
 		dpkg -i grafana_5.3.4_arm64.deb
 		ass_rst $? 0 "pkg install failed!"
 
 		rm -rf grafana_5.3.4_arm64.deb
 	elif [ "$DISTRIBUTION"x == "CentOS"x ] ; then
-		wget -O grafana-5.3.4-1.aarch64.rpm https://s3-us-west-2.amazonaws.com/grafana-releases/release/grafana-5.3.4-1.aarch64.rpm --no-check-certificate
-		ass_rst $? 0 "wget failed!"
+		rpm -qa | grep grafana-5.3.4-1.aarch64
+		if [ $? -eq 0 ] ; then
+			pr_ok "grafana already installed!"
+			return 0
+		fi
+
+		wget -T 10 -O grafana-5.3.4-1.aarch64.rpm ${LOCAL_SRC_DIR}/grafana-5.3.4-1.aarch64.rpm
+		if [ $? -ne 0 ] ; then
+			wget -O grafana-5.3.4-1.aarch64.rpm https://dl.grafana.com/oss/release/grafana-5.3.4-1.aarch64.rpm 
+			ass_rst $? 0 "wget failed!"
+		fi
 
 		rpm -i grafana-5.3.4-1.aarch64.rpm
 		ass_rst $? 0 "install grafana-5.3.4-1.aarch64.rpm failed!"
@@ -164,7 +176,7 @@ function compile_and_install()
 		rm -rf grafana-5.3.4-1.aarch64.rpm
 	fi
 
-	pr_tip "[install]<install>"
+	pr_ok "[install]<install> ok"
 	return 0
 }
 
