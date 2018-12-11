@@ -210,7 +210,7 @@ function install_depend()
 			apt-get update
 			apt-get install -y $DEPENDENCE
 			ass_rst $? 0 "install dependence using apt failed"
-			apt-get -t stretch-backports install luajit libluajit-5.1-dev
+			apt-get -t stretch-backports install -y luajit libluajit-5.1-dev
 			ass_rst $? 0 "install luajit failed"
 			rm $DEB_LIST
 			pr_ok "[depend] ok"
