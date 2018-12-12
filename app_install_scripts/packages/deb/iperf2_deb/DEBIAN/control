@@ -1,0 +1,8 @@
+Package: iperf
+Version: 2.0.13a
+Section: free
+Prioritt: optional
+Architecture: arm64
+Maintainer: xiaojun <xiaojun2@hisilicon.com>
+Description: qperf installation package
+
