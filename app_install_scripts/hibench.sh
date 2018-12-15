@@ -180,7 +180,7 @@ function compile_and_install()
 	fi
 	cd HiBench-$filename
 	mkdir hadoopbench/sql/target
-	wget http://archive.apache.org/dist/hive/hive-0.14.0//apache-hive-0.14.0-bin.tar.gz -P hadoopbench/sql/target
+	wget http://archive.apache.org/dist/hive/hive-0.14.0/apache-hive-0.14.0-bin.tar.gz -P hadoopbench/sql/target
 	ass_rst $? 0 "download sql dependece failed"
 	mkdir hadoopbench/mahout/target
 	wget http://archive.cloudera.com/cdh5/cdh/5/mahout-0.9-cdh5.1.0.tar.gz -P hadoopbench/mahout/target
