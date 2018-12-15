@@ -248,6 +248,7 @@ function compile_and_install()
 	pr_tip "[install]<compile> NULL"
 	pr_tip "[install]<install>"
 	cd $filename
+	patch -p0 < ../patch/bcc/init_0.7.0.patch
 	if [ ! -d "build" ]; then
 		mkdir build
 	else 
