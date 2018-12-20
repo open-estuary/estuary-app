@@ -31,7 +31,7 @@ MY_SRC_TAR=systemtap.tar.bz2
 MY_SRC_DIR=systemtap
 # MY_SRC_TAR
 MY_CENTOS_DEPEND="kernel kernel-devel kernel-debuginfo elfutils-devel"
-MY_DEBIAN_DEPEND="linux-image-4.19.0-8-arm64-dbg linux-headers-4.19.0-8-arm64 gettext libdw-dev"
+MY_DEBIAN_DEPEND="linux-image-4.19.0-9-arm64-dbg linux-headers-4.19.0-9-arm64 gettext libdw-dev"
 
 ### internal API ###
 
@@ -140,8 +140,8 @@ function install_depend()
 	fi
 
 	# patch for Debian
-	if [ ! -f /usr/src/linux-headers-4.19.0-8-common/srcipts/subarch.include ] ; then
-		cp patch/systemtap/subarch.include /usr/src/linux-headers-4.19.0-8-common/scripts/
+	if [ ! -f /usr/src/linux-headers-4.19.0-9-common/srcipts/subarch.include ] ; then
+		cp patch/systemtap/subarch.include /usr/src/linux-headers-4.19.0-9-common/scripts/
 	fi
 
 	pr_tip "[depend] skiped"
