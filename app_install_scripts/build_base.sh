@@ -148,11 +148,11 @@ function compile_and_install()
 	pr_tip "[install]<compile> skiped"
 
 	if [ "$DISTRIBUTION"x == "Debian"x ] ; then
-		apt-get install -y build-essential make git gcc g++ autoconf automake maven openjdk-8-jdk pkg-config cmake
+		apt-get install -y build-essential make git gcc g++ autoconf automake maven openjdk-8-jdk pkg-config cmake autoconf automake make
 		apt-get install -y unzip
 		pr_ok "[depend] ok"
 	elif [ "$DISTRIBUTION"x == "CentOS"x ] ; then
-		yum install -y make git gcc gcc-c++  autoconf automake maven java-1.8.0-openjdk cmake --setopt=skip_missing_names_on_install=False
+		yum install -y make git gcc gcc-c++  autoconf automake maven java-1.8.0-openjdk cmake autoconf automake make --setopt=skip_missing_names_on_install=False
 		yum install -y unzip bzip2 --setopt=skip_missing_names_on_install=False
 		pr_ok "[depend] ok"
 	fi
