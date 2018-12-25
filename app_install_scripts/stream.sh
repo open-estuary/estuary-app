@@ -161,7 +161,7 @@ function compile_and_install()
 	pr_tip "[install]<version> $version"
 	pr_tip "[install]<rm_git> skipped"
 	pr_tip "[install]<compile> skipped"
-	gcc -O3 stream.c -o stream
+	gcc -O3 -fopenmp stream.c -o stream
 	ass_rst $? 0 "compile failed"
 	chmod +x ./stream
 	pr_tip "[install]<install>"
