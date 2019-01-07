@@ -126,7 +126,7 @@ function install_depend()
 {
 	case $DISTRIBUTION in
 		"CentOS")
-			DEPENDENCE="wget cmake3 tar gcc gcc-c++ python2-pip bison flex elfutils-libelf-devel"
+			DEPENDENCE="wget cmake3 tar gcc gcc-c++ python2-pip bison flex elfutils-libelf-devel patch"
 			pr_tip "[depend] $DEPENDENCE"
 			yum --setopt=skip_missing_names_on_install=False install -y $DEPENDENCE
 			ass_rst $? 0 "install dependence using yum failed"
@@ -193,7 +193,7 @@ function install_depend()
 			pr_ok "[depend] ok"
 			;;
 		"Debian")
-			DEPENDENCE="wget tar gcc g++ linux-image-$(uname -r) linux-headers-$(uname -r) \
+			DEPENDENCE="wget tar gcc g++ linux-image-$(uname -r) linux-headers-$(uname -r) patch \
 			debhelper cmake libllvm6.0 llvm-6.0-dev libclang-6.0-dev \
 			libelf-dev bison flex libedit-dev clang-format-6.0 python python-netaddr \
 			python-pyroute2 arping iperf netperf ethtool \
@@ -248,6 +248,7 @@ function compile_and_install()
 	pr_tip "[install]<compile> NULL"
 	pr_tip "[install]<install>"
 	cd $filename
+	\cp -f ../patch/bcc/__init__.py /usr/lib/python2.7/site-packages/bcc/
 	patch -p0 < ../patch/bcc/init_0.7.0.patch
 	if [ ! -d "build" ]; then
 		mkdir build
