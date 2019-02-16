@@ -3,8 +3,8 @@
 ### Header info ###
 ## template: 	V01
 ## Author: 	XiaoJun x00467495
-## name:	rt-tests
-## desc:	linux realtime test suit
+## name:	pipework
+## desc:	pipework
 
 ### RULE
 ## 1. update Header info
@@ -21,14 +21,15 @@ MCOLOR_YELLOW="\033[33m"
 MCOLOR_END="\033[0m"
 # Color Macro End
 
-SRC_URL=NULL
-PKG_URL="https://git.kernel.org/pub/scm/utils/rt-tests/rt-tests.git/snapshot/rt-tests-1.0.tar.gz"
+SRC_URL="https://github.com/jpetazzo/pipework.git"
+PKG_URL=NULL
 DISTRIBUTION=NULL
 rst=0
 
 ## Selfdef Varis
-MY_SRC_DIR="rt-tests-1.0"
-MY_SRC_TAR="rt-tests.tar.gz"
+MY_SRC_DIR="pipework"
+INSTALL_DIR="/usr/local/bin"
+# MY_SRC_TAR
 
 ### internal API ###
 
@@ -114,38 +115,25 @@ function check_distribution()
 ## Interface: clear history files to prepare for reinstall files
 function clear_history()
 {
-	pr_tip "[clear] skiped"
+	rm -rf ${MY_SRC_DIR}
+	pr_ok "[clear] ok"
 	return 0
 }
 
 ## Interface: install dependency
 function install_depend()
 {
-	if [ "${DISTRIBUTION}"x == "CentOS"x ]; then
-		pr_tip "depend skiped"
-	elif [ "${DISTRIBUTION}"x == "Debian"x ]; then
-		apt-get install -y libnuma-dev build-essential
-		ass_rst $? 0 "apt-get failed!"
-
-		pr_ok "[depend] ok"
-	else
-		return 1
-	fi
-
+	pr_tip "[depend] skiped"
 	return 0
 }
 
 ## Interface: download_src
 function download_src()
 {
-	wget -O ${MY_SRC_TAR} ${PKG_URL}
-	ass_rst $? 0 "wget failed"
+	git clone ${SRC_URL}
+	ass_rst $? 0 "git clone failed"
 
-	tar xvf ${MY_SRC_TAR}
-	cd ${MY_SRC_DIR}
-	ass_rst $? 0 "cd ${MY_SRC_DIR} failed"
-
-	pr_ok "[download] ok"
+	pr_tip "[download] skiped"
 	return 0
 }
 
@@ -154,14 +142,10 @@ function compile_and_install()
 {
 	pr_tip "[install]<version> skiped"
 	pr_tip "[install]<rm_git> skiped"
+	pr_tip "[install]<compile> skiped"
 
-	make
-	ass_rst $? 0 "make failed"
-
-	pr_ok "[install]<compile> ok"
-
-	make install
-	ass_rst $? 0 "make install failed"
+	cp -rf ${MY_SRC_DIR}/pipework ${INSTALL_DIR}
+	ass_rst $? 0 "cp pipework failed"
 
 	pr_tip "[install]<install>"
 	return 0
@@ -171,11 +155,10 @@ function compile_and_install()
 ## example: print version number, run any simple example
 function selftest()
 {
-	rt-migrate-test
-	ass_rst $? 0 "rt-test install failed"
+	pipework
+	ass_rst $? 1 "pipework install failed"
 
 	pr_ok "[selftest] ok"
-
 	return 0
 }
 
