@@ -159,7 +159,7 @@ function selftest()
 {
 	pr_tip "[selftest] check status"
 	smbstatus
-	return #?
+	return $?
 }
 
 ## Interface: finish install

@@ -159,7 +159,7 @@ function selftest()
 {
 	pr_tip "[selftest] check usage"
 	lshw
-	return #?
+	return $?
 }
 
 ## Interface: finish install

@@ -185,7 +185,7 @@ function selftest()
 {
 	pr_tip "[selftest] check usage"
 	busybox
-	return #?
+	return $?
 }
 
 ## Interface: finish install

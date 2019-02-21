@@ -158,7 +158,7 @@ function selftest()
 {
 	pr_tip "[selftest] check version"
 	qemu-aarch64 --version
-	return #?
+	return $?
 }
 
 ## Interface: finish install

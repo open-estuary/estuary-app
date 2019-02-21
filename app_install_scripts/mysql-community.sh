@@ -164,7 +164,7 @@ function selftest()
 	pr_tip "[selftest] check version"
 	service mysqld start
 	service mysqld status
-	return #?
+	return $?
 }
 
 ## Interface: finish install

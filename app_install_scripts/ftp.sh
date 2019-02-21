@@ -159,7 +159,7 @@ function selftest()
 {
 	pr_tip "[selftest] check help menu"
 	ftp -help
-	return #?
+	return $?
 }
 
 ## Interface: finish install

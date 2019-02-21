@@ -159,7 +159,7 @@ function selftest()
 {
 	pr_tip "[selftest] check version"
 	ssh -V
-	return #?
+	return $?
 }
 
 ## Interface: finish install

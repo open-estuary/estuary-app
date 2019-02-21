@@ -159,7 +159,7 @@ function selftest()
 {
 	pr_tip "[selftest] check version"
 	python --version
-	return #?
+	return $?
 }
 
 ## Interface: finish install

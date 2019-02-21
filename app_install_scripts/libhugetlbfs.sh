@@ -163,7 +163,7 @@ function selftest()
 {
 	pr_tip "[selftest] skipped"
 	
-	return #?
+	return $?
 }
 
 ## Interface: finish install

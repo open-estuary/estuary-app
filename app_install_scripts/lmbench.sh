@@ -148,7 +148,7 @@ function download_src()
 	wget http://www.bitmover.com/lmbench/lmbench3.tar.gz -O $filename.tar.gz
 	ass_rst $? 0 "download failed"
 	tar -xf $filename.tar.gz
-	return #?
+	return $?
 }
 
 ## Interface: software self test

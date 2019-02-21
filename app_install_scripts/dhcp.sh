@@ -159,7 +159,7 @@ function selftest()
 {
 	pr_tip "[selftest] check version"
 	dhclient --version 
-	return #?
+	return $?
 }
 
 ## Interface: finish install

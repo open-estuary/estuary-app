@@ -159,7 +159,7 @@ function selftest()
 {
 	pr_tip "[selftest] check variable names and values"
 	bind -v
-	return #?
+	return $?
 }
 
 ## Interface: finish install

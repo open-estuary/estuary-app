@@ -163,7 +163,7 @@ function selftest()
 {
 	pr_tip "[selftest] check version"
 	docker -v
-	return #?
+	return $?
 }
 
 ## Interface: finish install

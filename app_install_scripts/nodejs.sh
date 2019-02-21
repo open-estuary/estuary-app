@@ -161,7 +161,7 @@ function selftest()
 {
 	pr_tip "[selftest] check version"
 	node --version
-	return #?
+	return $?
 }
 
 ## Interface: finish install
