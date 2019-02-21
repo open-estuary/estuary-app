@@ -149,11 +149,17 @@ function compile_and_install()
 
 	if [ "$DISTRIBUTION"x == "Debian"x ] ; then
 		apt-get install -y build-essential make git gcc g++ autoconf automake maven openjdk-8-jdk pkg-config cmake autoconf automake make
+		ass_rst $? 0 "apt-get install failed"
 		apt-get install -y unzip
+		ass_rst $? 0 "apt-get install failed"
+
 		pr_ok "[depend] ok"
 	elif [ "$DISTRIBUTION"x == "CentOS"x ] ; then
 		yum install -y make git gcc gcc-c++  autoconf automake maven java-1.8.0-openjdk cmake autoconf automake make --setopt=skip_missing_names_on_install=False
+		ass_rst $? 0 "yum install failed"
 		yum install -y unzip bzip2 --setopt=skip_missing_names_on_install=False
+		ass_rst $? 0 "yum install failed"
+
 		pr_ok "[depend] ok"
 	fi
 
