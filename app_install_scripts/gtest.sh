@@ -123,6 +123,10 @@ function clear_history()
 ## Interface: install dependency
 function install_depend()
 {
+	if [ "${DISTRIBUTION}"x == "CentOS"x ] ; then
+		yum install -y cmake3
+	fi
+
 	pr_tip "[depend] skiped"
 	return 0
 }
@@ -157,9 +161,13 @@ function compile_and_install()
 	pr_tip "[install]<version> skiped"
 	pr_tip "[install]<rm_git> skiped"
 
-	#if [ "${DISTRIBUTION}"x == "Debian"x ] ; then
-	mkdir build && cd build && cmake ..
-	ass_rst $? 0 "mk build dir failed!"
+	if [ "${DISTRIBUTION}"x == "Debian"x ] ; then
+		mkdir build && cd build && cmake ..
+		ass_rst $? 0 "cmake failed!"
+	elif [ "${DISTRIBUTION}"x == "CentOS"x ] ; then
+		mkdir build && cd build && cmake3 ..
+		ass_rst $? 0 "cmake3 failed"
+	fi
 
 	make
 	ass_rst $? 0 "make failed!"
@@ -168,7 +176,6 @@ function compile_and_install()
 	ass_rst $? 0 "make install failed!"
 
 	pr_ok "[install]<compile> OK"
-	#fi
 
 	if [ "$DISTRIBUTION"x == "Debian"x ] ; then
 		pr_info ""
