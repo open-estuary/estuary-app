@@ -130,10 +130,10 @@ function install_depend()
 ## Interface: download_src
 function download_src()
 {
-	if [ "${DISTRIBUTION}"x == "CentOS"x ] ; then
-		# centos no need to download source
-		return 0
-	fi
+	#if [ "${DISTRIBUTION}"x == "CentOS"x ] ; then
+	#	# centos no need to download source
+	#	return 0
+	#fi
 
 	if [ ! -f ${MY_SRC_TAR} ] ; then
 		wget ${SRC_URL}
@@ -157,23 +157,23 @@ function compile_and_install()
 	pr_tip "[install]<version> skiped"
 	pr_tip "[install]<rm_git> skiped"
 
-	if [ "${DISTRIBUTION}"x == "Debian"x ] ; then
-		mkdir build && cd build && cmake ..
-		ass_rst $? 0 "mk build dir failed!"
+	#if [ "${DISTRIBUTION}"x == "Debian"x ] ; then
+	mkdir build && cd build && cmake ..
+	ass_rst $? 0 "mk build dir failed!"
 
-		make
-		ass_rst $? 0 "make failed!"
+	make
+	ass_rst $? 0 "make failed!"
 
-		make install
-		ass_rst $? 0 "make install failed!"
+	make install
+	ass_rst $? 0 "make install failed!"
 
-		pr_ok "[install]<compile> OK"
-	fi
+	pr_ok "[install]<compile> OK"
+	#fi
 
 	if [ "$DISTRIBUTION"x == "Debian"x ] ; then
 		pr_info ""
 	elif [ "$DISTRIBUTION"x == "CentOS"x ] ; then
-		yum install -y gtest --setopt=skip_missing_names_on_install=False
+		pr_info ""
 	fi
 
 	pr_ok "[install]<install> OK"
