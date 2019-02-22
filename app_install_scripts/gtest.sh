@@ -124,7 +124,8 @@ function clear_history()
 function install_depend()
 {
 	if [ "${DISTRIBUTION}"x == "CentOS"x ] ; then
-		yum install -y cmake3
+		yum install -y cmake3 --setopt=skip_missing_names_on_install=False
+		ass_rst $? 0 "install cmake3 failed"
 	fi
 
 	pr_tip "[depend] skiped"
