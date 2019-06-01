@@ -1,8 +1,0 @@
-Package: qperf
-Version: 0.4.11
-Section: free
-Prioritt: optional
-Architecture: arm64
-Maintainer: xiaojun <xiaojun2@hisilicon.com>
-Description: qperf installation package
-

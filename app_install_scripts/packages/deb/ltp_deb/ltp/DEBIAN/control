@@ -1,8 +1,0 @@
-Package: ltp-full
-Version: 20180926
-Section: free
-Priority: optional
-Architecture: arm64
-Maintainer: xiaojun2@hisilicon.com
-Description: ltp-full for Estuary
-
