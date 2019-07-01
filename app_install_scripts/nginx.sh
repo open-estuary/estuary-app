@@ -1,17 +1,17 @@
-#!/bin/bash
+#! /bin/bash
 
 ### Header info ###
-## template: 	V01
-## Author: 	zhangwangqun  zwx644970
-## name:	qemu-kvm
-## desc:	qemu-kvm source code compile and install
+## template: 	V02
+## Author: 	mahongxin wx547872
+## name:	nginx
+## desc:	nginx package install
 
 ### RULE
 ## 1. update Header info
 ## 2. use pr_err/pr_tip/pr_ok/pr_info as print API
 ## 3. use ${ass_rst ret exp log} as result assert code
 ## 4. implement each Interface Functions if you need
-
+## 5. $1: option，(‘uninstall’ only)
 ### VARIS ###
 
 # Color Macro Start 
@@ -26,10 +26,9 @@ PKG_URL=NULL
 DISTRIBUTION=NULL
 rst=0
 
-
 ## Selfdef Varis
-# MY_SRC_DIR=""
-# MY_SRC_TAR=""
+# MY_SRC_DIR
+# MY_SRC_TAR
 
 ### internal API ###
 
@@ -63,11 +62,11 @@ function pr_info()
 	fi
 }
 
-# assert result [  $1: check value; $2: expect value; $3: fail log  ]
+# assert result [  $1: check value; $2: expect value; $3 fail log  ]
 function ass_rst() 
 {
 	if [ "$#"x != "3"x ] ; then
-		pr_err "ass_rst param fail, only $#, expected 3"
+		pr_err "ass_rst param faill, only $#, expected 3"
 		return 1
 	fi
 
@@ -78,6 +77,23 @@ function ass_rst()
 
 	return 0
 }
+
+### Interface Functions ###
+## Interface list:
+##	check_distribution()
+##	clear_history()
+##	install_depend()
+##	download_src()
+##		download src
+##		untar & cd topdir
+##	compile_and_install()
+##		toggle to the right version
+##		remove git info
+##		configure & compile
+##		install
+##	selftest()
+##  finish_install()
+##		remove files
 
 ## Interface: get distribution
 function check_distribution()
@@ -106,31 +122,42 @@ function clear_history()
 function install_depend()
 {
 	pr_tip "[depend] skiped"
+	if [ "$DISTRIBUTION"x == "Debian"x ] ; then
+		pr_info "install using apt-get"
+    		apt-get install -y wget tar pcre2-utils openssl hg-fast-export libpcre3 libpcre3-dev zlib1g-dev libssl-dev libgd-dev
+      		pr_ok "[compile]<install> ok"
+	elif [ "$DISTRIBUTION"x == "CentOS"x ] ; then
+        	pr_info "install using yum"
+        	yum --setopt=skip_missing_names_on_install=False install -y wget tar pcre2-static openssl-static gd-devel gd mercurial hg
+        	pr_ok "[compile]<install> ok"
+	fi
+		ass_rst $? 0 "install failed"
+		pr_tip "[install]<install>"
+
 	return 0
-	
 }
+
 ## Interface: download_src
 function download_src()
 {
-
-		if [ "$DISTRIBUTION"x == "Debian"x ] ; then
-        apt-get install -y gcc libvirt* virtinst*
-        ass_rst $? 0 "apt-get install failed!"
-	elif [ "$DISTRIBUTION"x == "CentOS"x ] ; then
-        yum --setopt=skip_missing_names_on_install=False install -y gcc qemu-kvm libvirt virt-install libguestfs-tools bridge-utils libvirt-python virt-manager
-        ass_rst $? 0 "yum install failed!"
-    else
-        ass_rst 0 1 "dependence check failed!"
-    fi
-
-        pr_ok "[depend] OK"
-		return 0
+	pr_tip "[download] skiped"
+	wget -O nginx-1.14.0.tar.gz http://nginx.org/download/nginx-1.14.0.tar.gz
+	hg clone http://hg.nginx.org/njs 
+	tar -zxvf nginx-1.14.0.tar.gz
+	return 0
 }
 
 ## Interface: compile_and_install
 function compile_and_install()
 {
-	pr_tip "[compile]<install> skiped"
+	pr_tip "[install]<version> skiped"
+	pr_tip "[install]<rm_git> skiped"
+	pr_tip "[install]<compile> skiped"
+	cd nginx-1.14.0
+	./configure --add-module=../njs/nginx --prefix=/usr/local/nginx --with-http_ssl_module --with-http_image_filter_module
+	make
+	make install
+	cd ../
 	return 0
 }
 
@@ -138,36 +165,44 @@ function compile_and_install()
 ## example: print version number, run any simple example
 function selftest()
 {
-	qemu-img --help
-	ass_rst $? 0 "qemu_install failed!"
+	pr_tip "[selftest] skiped"
+	return $?
 }
 
+## Interface: finish install
+function finish_install()
+{
+	pr_tip "[finish]<clean> skiped"
+	return 0
+}
 function uninstall()
 {
-	if [ "$DISTRIBUTION"x == "Debian"x ] ; then
-        apt-get remove -y libvirt* virtinst*
-        ass_rst $? 0 "apt-get remove failed!"
-	elif [ "$DISTRIBUTION"x == "CentOS"x ] ; then
-        yum --setopt=skip_missing_names_on_install=False remove -y qemu-kvm libvirt virt-install libguestfs-tools bridge-utils libvirt-python virt-manager
-        ass_rst $? 0 "yum remove failed!"
-    fi
+	cd nginx-1.14.0
+	make clean
+	cd ../
+	rm -rf /usr/local/nginx
+	rm -rf nginx-1.14.0 nginx-1.14.0.tar.gz
+	rm -rf njs
+
 }
-	
+### Dependence ###
+
+### Compile and Install ###
+
+### selftest ###
+
 ### main code ###
 function main()
 {
 	check_distribution
 	ass_rst $? 0 "check_distribution failed!"
-	
-	if [ "$1"x == "uninstall"x ]; then
-        uninstall
-        ass_rst $? 0 "uninstall failed!"
-        pr_ok "Software uninstall OK!"
-        exit 0
-    fi
-	
+	if [ "$1" == "uninstall" ]; then
+		uninstall
+		ass_rst $? 0 "uninstall failed!"
+		exit 0
+	fi
 	clear_history
-	ass_rst $? 0 "clear_history failed"
+	ass_rst $? 0 "clear_history failed!"
 	
 	install_depend
 	ass_rst $? 0 "install_depend failed!"
@@ -180,9 +215,9 @@ function main()
 	
 	selftest
 	ass_rst $? 0 "selftest failed!"
-	
-	#finish_install
-	#ass_rst $? 0 "finish_install failed"
+
+	finish_install
+	ass_rst $? 0 "finish_install failed"
 }
 
 pr_tip "-------- software compile and install start --------"

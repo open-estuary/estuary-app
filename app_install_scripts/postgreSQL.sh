@@ -2,9 +2,9 @@
 
 ### Header info ###
 ## template: 	V01
-## Author: 	XiaoJun x00467495
-## name:	ycsb
-## desc:	Yahoo! Cloud Serving Benchmark
+## Author: 	GongYinghua g00467629
+## name:	PostgreSQL
+## desc:	PostgreSQL source code compile and install
 
 ### RULE
 ## 1. update Header info
@@ -21,16 +21,16 @@ MCOLOR_YELLOW="\033[33m"
 MCOLOR_END="\033[0m"
 # Color Macro End
 
-SRC_URL=NULL
-PKG_URL="https://github.com/brianfrankcooper/YCSB/releases/download/0.12.0/ycsb-0.12.0.tar.gz"
+SRC_URL="https://ftp.postgresql.org/pub/source/v9.2.23/postgresql-9.2.23.tar.gz"
+PKG_URL=NULL
 DISTRIBUTION=NULL
 rst=0
-LOCAL_SRC_DIR="192.168.1.107/estuary"
+LOCAL_SRC_DIR="192.168.1.107/"
+path=`pwd`
 
 ## Selfdef Varis
-MY_SRC_DIR="ycsb-0.12.0"
-MY_SRC_TAR="ycsb-0.12.0.tar.gz"
-MY_SRC_PATH=/root/test-definitions/auto-test/middleware/tool/ycsb
+MY_SRC_DIR="postgresql-9.2.23"
+MY_SRC_TAR="postgresql-9.2.23.tar.gz"
 
 ### internal API ###
 
@@ -64,11 +64,11 @@ function pr_info()
 	fi
 }
 
-# assert result [  $1: check value; $2: expect value; $3 fail log  ]
+# assert result [  $1: check value; $2: expect value; $3: fail log  ]
 function ass_rst() 
 {
 	if [ "$#"x != "3"x ] ; then
-		pr_err "ass_rst param faill, only $#, expected 3"
+		pr_err "ass_rst param fail, only $#, expected 3"
 		return 1
 	fi
 
@@ -76,7 +76,7 @@ function ass_rst()
 		pr_err "$3"
 		exit 1
 	fi
-
+	
 	return 0
 }
 
@@ -107,9 +107,9 @@ function check_distribution()
 	else
 		DISTRIBUTION='unknown'
 	fi
-
+	
 	pr_tip "Distribution : ${DISTRIBUTION}"
-
+	
 	return 0
 }
 
@@ -123,22 +123,31 @@ function clear_history()
 ## Interface: install dependency
 function install_depend()
 {
-	pr_tip "[depend] skiped"
+	if [ "$DISTRIBUTION"x == "Debian"x ] ; then
+		apt-get install -y make expect gcc libreadline-dev zlib1g-dev python-dev libxml2-dev
+		ass_rst $? 0 "apt-get install failed!"
+	elif [ "$DISTRIBUTION"x == "CentOS"x ] ; then
+		yum install -y make gcc expect readline-devel zlib-devel python-devel libxml2-devel 
+		ass_rst $? 0 "yum install failed!"
+	else
+		ass_rst 0 1 "dependence check failed!"
+	fi
+	pr_ok "[depend] OK"
 	return 0
 }
-
 ## Interface: download_src
 function download_src()
 {
-	wget -T 60 -O ${MY_SRC_TAR} ${LOCAL_SRC_DIR}/${MY_SRC_TAR}
+	wget -T 10 -O ${MY_SRC_TAR} ${LOCAL_SRC_DIR}/${MY_SRC_TAR}
 	if [ $? -ne 0 ]; then
-		wget -O ${MY_SRC_TAR} ${PKG_URL}
-		ass_rst $? 0 "wget failed"
+		wget -O ${SRC_URL} --no-check-certificate 
+		ass_rst $? 0 "wget ${SRC_URAL} failed!"
 	fi
-
-	tar -xvf ./${MY_SRC_TAR} -C ${MY_SRC_PATH}
-
-	pr_ok "[download] ok"
+	tar -xvzf ${MY_SRC_TAR}
+	ass_rst $? 0 "untar ${MY_SRC_TAR} failed!"
+	cd ${MY_SRC_DIR}
+	
+	pr_ok "[download] OK!"
 	return 0
 }
 
@@ -148,14 +157,28 @@ function compile_and_install()
 	pr_tip "[install]<version> skiped"
 	pr_tip "[install]<rm_git> skiped"
 	pr_tip "[install]<compile> skiped"
+	
+	./configure
+		ass_rst $? 0 "configure failed!"
 
-	if [ "$DISTRIBUTION"x == "Debian"x ] ; then
+	make -j64
+		ass_rst $? 0 "make failed!"
+
+#		make check
+#		ass_rst $? 0 "make check failed!"
+
+	make install -j64
+		ass_rst $? 0 "make install failed!"
+
+	pr_ok "[install]<compile> OK"
+
+	if [ "$DISTRIBUTION"x == "Debian"x ]; then
 		pr_info ""
-	elif [ "$DISTRIBUTION"x == "CentOS"x ] ; then
+	elif [ "$DISTRIBUTION"x == "CentOS"x ]; then
 		pr_info ""
 	fi
 
-	pr_tip "[install]<install>"
+	pr_ok "[install]<install> OK"
 	return 0
 }
 
@@ -163,28 +186,42 @@ function compile_and_install()
 ## example: print version number, run any simple example
 function selftest()
 {
-	cd ${MY_SRC_PATH}
-	${MY_SRC_DIR}/bin/ycsb run basic ${MY_SRC_DIR}/workload/workloada
-	ass_rst $? 0 "selftest failed"
-
+	/usr/local/pgsql/bin/psql --version
+	if [ $? -eq 0 ]
+	then
+		pr_info "install_OK"
+	else
+		pr_info "install_fail"
+	fi
+	
 	pr_tip "[selftest] skiped"
 	return 0
 }
 
-## Interface: uninstall
 function uninstall()
 {
-	rm -rf ./${MY_SRC_TAR}
-	rm -rf ${MY_SRC_PATH}/${MY_SRC_DIR}
+	if [ "$DISTRIBUTION"x == "Debian"x ] ; then
+		apt-get remove -y postgresql-libs
+		ass_rst $? 0 "apt-get remove failed!"
+	elif [ "$DISTRIBUTION"x == "CentOS"x ] ; then
+		yum remove -y postgresql-libs
+		ass_rst $? 0 "yum remove failed!"
+	fi
+	cd ${path}/postgresql-9.2.23 && make uninstall && make clean
+	netstat -apn |grep 5432|grep -v grep|awk '{print $8}'|awk -F"/" '{print $1}'|xargs kill -9
+	rm -rf ${path}/${MY_SRC_DIR} ${path}/${MY_SRC_TAR}
 }
-
+	
 ## Interface: finish install
-function finish_install()
-{
-	# rm -rf ${MY_SRC_TAR}
-	pr_tip "[finish]<clean> skiped"
-	return 0
-}
+#function finish_install()
+#{
+#
+#	cd ../..
+#	rm -rf ${MY_SRC_DIR} ${MY_SRC_TAR}
+#
+#	pr_ok "[finish]<clean> OK"
+#	return 0
+#}
 
 ### Dependence ###
 
@@ -204,9 +241,9 @@ function main()
 		pr_ok "Software uninstall OK!"
 		exit 0
 	fi
-
+	
 	clear_history
-	ass_rst $? 0 "clear_history failed!"
+	ass_rst $? 0 "clear_history failed"
 	
 	install_depend
 	ass_rst $? 0 "install_depend failed!"
@@ -219,9 +256,9 @@ function main()
 	
 	selftest
 	ass_rst $? 0 "selftest failed!"
-
-	finish_install
-	ass_rst $? 0 "finish_install failed"
+	
+	#finstall
+	#ass_rst $? 0 "finish_ish_ininstall failed"
 }
 
 pr_tip "-------- software compile and install start --------"
@@ -234,4 +271,3 @@ pr_ok " "
 pr_ok "Software install OK!"
 
 pr_tip "--------  software compile and install end  --------"
-end;

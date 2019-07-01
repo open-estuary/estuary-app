@@ -1,16 +1,17 @@
 #! /bin/bash
 
 ### Header info ###
-## template: 	V01
-## Author: 	XiaoJun x00467495
-## name:	ycsb
-## desc:	Yahoo! Cloud Serving Benchmark
+## template:    V01
+## Author:  ShenCheng wx703520
+## name:    LAMP
+## desc:    LAMP package install and uninstall
 
 ### RULE
 ## 1. update Header info
 ## 2. use pr_err/pr_tip/pr_ok/pr_info as print API
 ## 3. use ${ass_rst ret exp log} as result assert code
 ## 4. implement each Interface Functions if you need
+## 5. $1: option，(‘uninstall’ only)
 
 ### VARIS ###
 
@@ -20,17 +21,18 @@ MCOLOR_GREEN="\033[32m"
 MCOLOR_YELLOW="\033[33m"
 MCOLOR_END="\033[0m"
 # Color Macro End
+install_pkgs="curl net-tools expect lsof httpd httpd-devel mysql-community-server php php-mysql php-fpm"
+uninstall_pkgs="net-tools httpd php php-* mysql-*"
+install_pkgss="curl net-tools expect lsof apache2 php-fpm mysql-server php-mysql php-common libapache2-mod-php"
 
 SRC_URL=NULL
-PKG_URL="https://github.com/brianfrankcooper/YCSB/releases/download/0.12.0/ycsb-0.12.0.tar.gz"
+PKG_URL=NULL
 DISTRIBUTION=NULL
 rst=0
-LOCAL_SRC_DIR="192.168.1.107/estuary"
 
 ## Selfdef Varis
-MY_SRC_DIR="ycsb-0.12.0"
-MY_SRC_TAR="ycsb-0.12.0.tar.gz"
-MY_SRC_PATH=/root/test-definitions/auto-test/middleware/tool/ycsb
+# MY_SRC_DIR
+# MY_SRC_TAR
 
 ### internal API ###
 
@@ -83,6 +85,9 @@ function ass_rst()
 ### Interface Functions ###
 ## Interface list:
 ##	check_distribution()
+##	if $1=="uninstall"
+##		uninstall()
+##		exit 0
 ##	clear_history()
 ##	install_depend()
 ##	download_src()
@@ -119,69 +124,63 @@ function clear_history()
 	pr_tip "[clear] skiped"
 	return 0
 }
+## Interface: compile_and_install
 
-## Interface: install dependency
-function install_depend()
+## Interface: compile_and_install
+function compile_and_install()
 {
-	pr_tip "[depend] skiped"
+	pr_tip "[compile_and_install] skiped"
 	return 0
 }
 
 ## Interface: download_src
 function download_src()
 {
-	wget -T 60 -O ${MY_SRC_TAR} ${LOCAL_SRC_DIR}/${MY_SRC_TAR}
-	if [ $? -ne 0 ]; then
-		wget -O ${MY_SRC_TAR} ${PKG_URL}
-		ass_rst $? 0 "wget failed"
-	fi
-
-	tar -xvf ./${MY_SRC_TAR} -C ${MY_SRC_PATH}
-
-	pr_ok "[download] ok"
+	pr_tip "[download] skiped"
 	return 0
 }
 
-## Interface: compile_and_install
-function compile_and_install()
+
+## Interface: install dependency
+function install_depend()
 {
-	pr_tip "[install]<version> skiped"
-	pr_tip "[install]<rm_git> skiped"
-	pr_tip "[install]<compile> skiped"
+    if [ "$DISTRIBUTION"x == "Debian"x ] ; then
+        pr_info "install using apt-get"
+        apt-get install -y ${install_pkgss}
+        pr_ok "[compile]<install> ok"
 
-	if [ "$DISTRIBUTION"x == "Debian"x ] ; then
-		pr_info ""
-	elif [ "$DISTRIBUTION"x == "CentOS"x ] ; then
-		pr_info ""
-	fi
+    elif [ "$DISTRIBUTION"x == "CentOS"x ] ; then
+        pr_info "install using yum"
+        yum --setopt=skip_missing_names_on_install=False install -y ${install_pkgs}
+        pr_ok "[compile]<install> ok"
 
-	pr_tip "[install]<install>"
-	return 0
+    fi
+    ass_rst $? 0 "install failed"
+    pr_tip "[install]<install>"
+    return 0
 }
+
 
 ## Interface: software self test
 ## example: print version number, run any simple example
 function selftest()
 {
-	cd ${MY_SRC_PATH}
-	${MY_SRC_DIR}/bin/ycsb run basic ${MY_SRC_DIR}/workload/workloada
-	ass_rst $? 0 "selftest failed"
-
-	pr_tip "[selftest] skiped"
+	pr_tip "[selftest] check version"
+	mysql --version
+	ass_rst $? 0 "[selftest] check version mysql fail"
+	pr_ok "[selftest]<mysql> ok"
+	php -v
+	ass_rst $? 0 "[selftest] check version php fail"
+	pr_ok "[selftest]<php> ok"	
+	httpd -v
+	ass_rst $? 0 "[selftest] check version httpd fail"
+	pr_ok "[selftest]<httpd> ok"	
 	return 0
-}
-
-## Interface: uninstall
-function uninstall()
-{
-	rm -rf ./${MY_SRC_TAR}
-	rm -rf ${MY_SRC_PATH}/${MY_SRC_DIR}
 }
 
 ## Interface: finish install
 function finish_install()
 {
-	# rm -rf ${MY_SRC_TAR}
 	pr_tip "[finish]<clean> skiped"
 	return 0
 }
@@ -192,19 +191,35 @@ function finish_install()
 
 ### selftest ###
 
+### uninstall ###
+function uninstall()
+{
+    if [ "$DISTRIBUTION"x == "Debian"x ] ; then
+        pr_info "uninstall using apt-get"
+        apt-get remove -y ${uninstall_pkgss}
+        pr_ok "<uninstall> ok"
+    elif [ "$DISTRIBUTION"x == "CentOS"x ] ; then
+        pr_info "uninstall using yum"
+        yum -y remove ${uninstall_pkgs}
+        pr_ok "<uninstall> ok"
+    fi
+    ass_rst $? 0 "uninstall failed"
+    pr_tip "[uninstall]<uninstall>"
+    return 0
+}
+
 ### main code ###
 function main()
 {
 	check_distribution
 	ass_rst $? 0 "check_distribution failed!"
-	
-	if [ "$1"x == "uninstall"x ]; then
+
+	if [ x"$1" == x"uninstall" ] ; then
 		uninstall
 		ass_rst $? 0 "uninstall failed!"
-		pr_ok "Software uninstall OK!"
 		exit 0
 	fi
-
+	
 	clear_history
 	ass_rst $? 0 "clear_history failed!"
 	
@@ -234,4 +249,3 @@ pr_ok " "
 pr_ok "Software install OK!"
 
 pr_tip "--------  software compile and install end  --------"
-end;

@@ -2,9 +2,9 @@
 
 ### Header info ###
 ## template: 	V02
-## Author: 	XiaoJun x00467495
-## name:	pipework
-## desc:	pipework package install and uninstall
+## Author: 	lwx588815
+## name:	elasticsearch
+## desc:	elasticsearch package install and uninstall
 
 ### RULE
 ## 1. update Header info
@@ -127,11 +127,11 @@ function install_depend()
 {
 	if [ "$DISTRIBUTION"x == "Debian"x ] ; then
 		pr_info "install using apt-get"
-		apt-get install -y git bridge-utils net-tools
+                apt --setopt=skip_missing_names_on_install=False install curl wget openjdk-8-jdk -y
 		pr_ok "[compile]<install> ok"
 	elif [ "$DISTRIBUTION"x == "CentOS"x ] ; then
 		pr_info "install using yum"		
-		yum install -y git docker bridge-utils net-tools
+                yum --setopt=skip_missing_names_on_install=False install wget curl java-1.8.0-openjdk -y
 		pr_ok "[compile]<install> ok"
 	fi
 	pr_tip "[depend] skiped"
@@ -140,12 +140,14 @@ function install_depend()
 
 ## Interface: download_src
 function src_download()
-{
-	git clone https://github.com/jpetazzo/pipework.git
-	cp pipework/pipework /usr/local/bin
-	if [ "$DISTRIBUTION"x == "Debian"x ] ; then
-		bash ../../../../../estuary-app/app_install_scripts/get-docker.sh --mirror Aliyun
+{	
+	cd /home
+	wget -T 10 -O elasticsearch-6.2.3.tar.gz 192.168.1.107/liubeijie/elasticsearch-6.2.3.tar.gz
+	if [ $? -ne 0 ];then
+		wget  -T 10 -O elasticsearch-6.2.3.tar.gz https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.2.3.tar.gz
 	fi
+	tar -zxvf elasticsearch-6.2.3.tar.gz
+        cd /home/elasticsearch-6.2.3
 	pr_tip "[download] skiped"
 	return 0
 }
@@ -156,6 +158,41 @@ function compile_and_install()
 	pr_tip "[install]<version> skiped"
 	pr_tip "[install]<rm_git> skiped"
 	pr_tip "[install]<compile> skiped"
+	
+	if [ "$DISTRIBUTION"x == "Debian"x ] ; then
+		sed -i 's/#network.host: 192.168.0.1/network.host: localhost/g' config/elasticsearch.yml
+                sed -i 's/#http.port: 9200/http.port: 9200/g' config/elasticsearch.yml
+                cat /etc/security/limits.conf |grep "* soft nofile  65536"
+                if [ $? -ne 0 ];then
+                        echo "* soft nofile  65536" >> /etc/security/limits.conf
+                        echo "* hard nofile  65536" >> /etc/security/limits.conf
+                        echo "* soft nproc   65536" >> /etc/security/limits.conf
+                        echo "* hard nproc   65536" >> /etc/security/limits.conf
+                fi
+                cat /etc/sysctl.conf |grep "vm.max_map_count=655360"
+                if [ $? -ne 0 ];then
+                        echo "vm.max_map_count=655360" >> /etc/sysctl.conf
+                        sysctl -p
+                fi
+
+        elif [ "$DISTRIBUTION"x == "CentOS"x ] ; then
+                sed -i 's/#network.host: 192.168.0.1/network.host: localhost/g' config/elasticsearch.yml
+                sed -i 's/#http.port: 9200/http.port: 9200/g' config/elasticsearch.yml
+                cat /etc/security/limits.conf |grep "* soft nofile  65536"
+                if [ $? -ne 0 ];then
+                        echo "* soft nofile  65536" >> /etc/security/limits.conf
+                        echo "* hard nofile  65536" >> /etc/security/limits.conf
+                        echo "* soft nproc   65536" >> /etc/security/limits.conf
+                        echo "* hard nproc   65536" >> /etc/security/limits.conf
+                fi
+                sed -i 's/4096/40960/g' /etc/security/limits.d/20-nproc.conf
+                cat /etc/sysctl.conf |grep "vm.max_map_count=655360"
+                if [ $? -ne 0 ];then
+                        echo "vm.max_map_count=655360" >> /etc/sysctl.conf
+                        sysctl -p
+                fi
+
+	fi
 	ass_rst $? 0 "install failed"
 	pr_tip "[install]<install>"
 	return 0
@@ -166,7 +203,7 @@ function compile_and_install()
 function selftest()
 {
 	pr_tip "[selftest] skiped"
-	return $?
+    	return $?
 }
 
 ## Interface: finish install
@@ -185,11 +222,20 @@ function finish_install()
 ### uninstall ###
 function uninstall()
 {
-	rm -rf pipework
-	ass_rst $? 0 "uninstall failed"
-	pr_tip "[uninstall]<uninstall>"
-
-	return 0
+	if [ "$DISTRIBUTION"x == "Debian"x ] ; then
+        	pr_info "remove using apt-get"
+		rm -rf /home/elasticsearch-6.2.3
+        	rm -rf /home/elasticsearch-6.2.3.tar.gz
+        	pr_ok "[compile]<uninstall> ok"
+	elif [ "$DISTRIBUTION"x == "CentOS"x ] ; then
+        	pr_info "remove using yum"
+		rm -rf /home/elasticsearch-6.2.3
+		rm -rf /home/elasticsearch-6.2.3.tar.gz
+        	pr_ok "[compile]<uninstall> ok"
+    	fi
+    	ass_rst $? 0 "uninstall failed"
+    	pr_tip "[uninstall]<uninstall>"
+    	return 0
 }
 
 ### main code ###
@@ -197,12 +243,13 @@ function main()
 {
 	check_distribution
 	ass_rst $? 0 "check_distribution failed!"
-	if [ "$1"x == "uninstall"x ]; then
-		uninstall
-		ass_rst $? 0 "uninstall failed!"
-		pr_ok "Software uninstall OK!"
-		exit 0
-	fi
+
+    	if [ "$1"x == "uninstall"x ]; then
+        	uninstall
+        	ass_rst $? 0 "uninstall failed!"
+        	pr_ok "Software uninstall OK!"
+        	exit 0
+    	fi
 
 	clear_history
 	ass_rst $? 0 "clear_history failed!"
