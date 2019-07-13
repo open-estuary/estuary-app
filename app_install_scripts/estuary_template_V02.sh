@@ -144,27 +144,19 @@ function compile_and_install()
 	pr_tip "[install]<compile> skiped"
 
 	if [ "$DISTRIBUTION"x == "Debian"x ] ; then
-		pr_info "install using apt-get"
-		apt-get install -y APP
-		pr_ok "[compile]<install> ok"
+		#pr_info "install using apt-get"
+		#apt-get install -y APP
+		pr_tip "[compile]<install> skiped"
 	elif [ "$DISTRIBUTION"x == "CentOS"x ] ; then
-		pr_info "install using yum"
-		yum --setopt=skip_missing_names_on_install=False install -y APP
-		pr_ok "[compile]<install> ok"
+		#pr_info "install using yum"
+		#yum --setopt=skip_missing_names_on_install=False install -y APP
+		pr_tip "[compile]<install> skiped"
 	fi
 	ass_rst $? 0 "install failed"
 	pr_tip "[install]<install>"
 	return 0
 }
 
-## Interface: software self test
-## example: print version number, run any simple example
-function selftest()
-{
-	pr_tip "[selftest] check version"
-	APP -v
-	return $?
-}
 
 ## Interface: finish install
 function finish_install()
@@ -173,15 +165,23 @@ function finish_install()
 	return 0
 }
 
-### Dependence ###
+## Interface: software self test
+## example: print version number, run any simple example
+function selftest()
+{
+	pr_tip "[selftest] skiped"
+	#APP -v
+	ass_rst $? 0 "[selftest] failed"
 
-### Compile and Install ###
-
-### selftest ###
+	return 0
+}
 
 ### uninstall ###
 function uninstall()
 {
+	pr_tip "[uninstall] skiped"
+	
+	ass_rst $? 0 "[uninstall] failed"
 	return 0
 }
 
@@ -210,7 +210,7 @@ function main()
 	ass_rst $? 0 "compile_and_install failed!"
 	
 	selftest
-	ass_rst $? 1 "selftest failed!"
+	ass_rst $? 0 "selftest failed!"
 
 	finish_install
 	ass_rst $? 0 "finish_install failed"
@@ -223,6 +223,6 @@ rst=$?
 ass_rst $rst 0 "[FINAL] Software install,Fail!"
 
 pr_ok " "
-pr_ok "Software install OK!"
+pr_ok "Software install finished!"
 
 pr_tip "--------  software compile and install end  --------"
