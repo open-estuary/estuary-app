@@ -2,7 +2,7 @@
 
 ### Header info ###
 ## template: 	V01
-## Author: 	XiaoJun x00467495
+## Author: 	LiHang l00465864
 ## name:	workload-automation
 ## desc:	workload-automation source code compile and install
 
